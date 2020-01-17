@@ -8,6 +8,7 @@ void leftWall() {
 
   //Properties
   leftWall.setStatic(true);
+  leftWall.setGrabbable(false);
 
   world.add(leftWall);
 }//----------------------------------------------------------------------------
@@ -22,6 +23,7 @@ void rightWall() {
 
   //Properties
   rightWall.setStatic(true);
+  rightWall.setGrabbable(false);
 
   world.add(rightWall);
 }//----------------------------------------------------------------------------
@@ -36,6 +38,7 @@ void leftGround() {
 
   //Properties
   leftGround.setStatic(true);
+  leftGround.setGrabbable(false);
 
   world.add(leftGround);
 }//----------------------------------------------------------------------------
@@ -50,6 +53,7 @@ void rightGround() {
 
   //Properties
   rightGround.setStatic(true);
+  rightGround.setGrabbable(false);
 
   world.add(rightGround);
 }//----------------------------------------------------------------------------
@@ -64,6 +68,7 @@ void net() {
 
   //Properties
   net.setStatic(true);
+  net.setGrabbable(false);
 
   world.add(net);
 }//----------------------------------------------------------------------------

@@ -32,8 +32,15 @@ boolean wKey, aKey, sKey, dKey;
 boolean up, left, down, right;
 boolean leftCanJump, rJump;
 
+//Game
+int leftScore, rightScore;
+int timer = 0;
+
 void setup() {
+  //Basic
   fullScreen(FX2D);
+  textSize(100);
+  textAlign(CENTER);
 
   //Initialize world
   Fisica.init(this);
@@ -51,51 +58,35 @@ void setup() {
   ball();
 
   //Initializes Variables
+  timer = -1;
 }//----------------------------------------------------------------------------
 
 void draw() {
   background(black);
 
-  //Left Player Move
-  if (aKey)  leftPlayer.addImpulse(-500, 0);
-  if (dKey)  leftPlayer.addImpulse(500, 0);
-
-  //Sets leftCanJump variable
-  leftCanJump = false;
-  ArrayList<FContact> leftContactList = leftPlayer.getContacts();
-  for (FContact tempContact : leftContactList) {
-    if (tempContact.contains(leftGround)) leftCanJump = true;
-  }
-
+  //left player move
+  if (aKey) leftPlayer.addImpulse(-500, 0);
+  if (dKey) leftPlayer.addImpulse(500, 0);
   //Jumps if it can
-  if (leftCanJump && wKey) leftPlayer.addImpulse(0, -5000);   
+  if (leftCanJump && wKey) leftPlayer.addImpulse(0, -4000);   
 
-  //Right Player Move
+  //right player move
   if (left)  rightPlayer.addImpulse(-500, 0);
   if (right) rightPlayer.addImpulse(500, 0);
-
-  //Sets rightCanJump variable
-  rJump = false;
-  ArrayList<FContact> rightContactList = rightPlayer.getContacts();
-  for (FContact tempContact : rightContactList) {
-    if (tempContact.contains(rightGround)) rJump = true;
-  }
-
   //Jumps if it can
-  if (rJump && up) rightPlayer.addImpulse(0, -5000);
+  if (rJump && up) rightPlayer.addImpulse(0, -4000);
 
-  //Ball collisions
-  ArrayList<FContact> ballContactList = ball.getContacts();
-  for (FContact tempContact : ballContactList) {
-    if (tempContact.contains(leftGround)) {
-      setup();
-      ball.setPosition(width*3/4, height/2);
-    }
-    if (tempContact.contains(rightGround)) {
-      setup();
-      ball.setPosition(width/4, height/2);
-    }
-  }
+  //player and ball collisions
+  collisions();
+
+  //left score
+  fill(white);
+  text(leftScore, 50, 100);
+
+  //right score
+  fill(white);
+  text(rightScore, width-50, 100);
+
 
   world.step(); //Calclates forces
   world.draw(); //Makes them in processing
@@ -127,4 +118,63 @@ void keyReleased() {
   if (keyCode == LEFT)  left  = false;
   if (keyCode == DOWN)  down  = false;
   if (keyCode == RIGHT) right = false;
+}//----------------------------------------------------------------------------
+
+void collisions() {
+  //Sets leftCanJump variable
+  leftCanJump = false;
+  ArrayList<FContact> leftContactList = leftPlayer.getContacts();
+  for (FContact tempContact : leftContactList) {
+    if (tempContact.contains(leftGround)) leftCanJump = true;
+  }
+
+  //leftPlayer can't go past middle
+  float leftX = leftPlayer.getX();
+  if (leftX >= width/2 - width/64) {
+    leftX = width/2 - width/64;
+    leftPlayer.setPosition(leftX, leftPlayer.getY());
+    leftPlayer.setVelocity(-50, leftPlayer.getVelocityY());
+  }
+
+  //Sets rightCanJump variable
+  rJump = false;
+  ArrayList<FContact> rightContactList = rightPlayer.getContacts();
+  for (FContact tempContact : rightContactList) {
+    if (tempContact.contains(rightGround)) rJump = true;
+  }
+
+  //rightPlayer can't go past middle
+  float rightX = rightPlayer.getX();
+  if (rightX <= width/2 + width/64) {
+    rightX = width/2 + width/64;
+    rightPlayer.setPosition(rightX, rightPlayer.getY());
+    rightPlayer.setVelocity(50, rightPlayer.getVelocityY());
+  }
+
+  //Ball collisions
+  ArrayList<FContact> ballContactList = ball.getContacts();
+  for (FContact tempContact : ballContactList) {
+    //1. falls on left side
+    if (tempContact.contains(leftGround)) {
+      setup();
+      ball.setPosition(width*3/4, height/2);
+      rightScore++;
+      timer = 120;
+    }//1.
+    //1. falls on left side
+    if (tempContact.contains(rightGround)) {
+      setup();
+      ball.setPosition(width/4, height/2);
+      leftScore++;
+      timer = 120;
+    }//1.
+    //1. touches left player
+    if (tempContact.contains(leftPlayer)) {
+      ball.setFillColor(violet);
+    }//1.
+    //1. touches right player
+    if (tempContact.contains(rightPlayer)) {
+      ball.setFillColor(navy);
+    }//1.
+  }
 }//----------------------------------------------------------------------------
