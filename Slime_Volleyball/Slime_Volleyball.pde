@@ -21,6 +21,24 @@ color black           = #000000;
 color grey            = #808080;
 color white           = #ffffff;
 
+//Strokes
+color darkGreen       = #269900;
+color darkMint        = #009926;
+color darkBlue        = #004d99;
+color darkPurple      = #4d0099;
+color darkViolet      = #990099;
+
+//Mode Franework
+final int GAME = 1;
+final int LEFT_WIN = 2;
+final int RIGHT_WIN = 3;
+int mode;
+
+ArrayList<PImage> backgroundList;
+String zero;
+int i, n = 0;
+PImage backgroundPic, groundPic, leftPlayerPic, rightPlayerPic;
+
 //Players
 FCircle leftPlayer, rightPlayer, ball;
 
@@ -35,6 +53,7 @@ boolean leftCanJump, rJump;
 //Game
 int leftScore, rightScore;
 int timer = 0;
+color ballColor, ballStroke;
 
 void setup() {
   //Basic
@@ -42,16 +61,27 @@ void setup() {
   textSize(100);
   textAlign(CENTER);
 
+  //Images
+  backgroundList = new ArrayList<PImage>(50);
+  for (int i = 0; i <= 49; i++) {
+    if (i < 10) zero = "0";
+    else zero = "";
+    PImage tempImage = loadImage("Frames/frame_" + zero + i + "_delay-0.1s.gif");
+    backgroundList.add(tempImage);
+  }
+  groundPic = loadImage("Ground.png");
+
   //Initialize world
   Fisica.init(this);
   world = new FWorld();
-  world.setGravity(0, 1000);
+  world.setGravity(0, 750);
 
   //Environment
   leftWall();
   rightWall();
   leftGround();
   rightGround();
+  ceiling();
   net();
   leftPlayer();
   rightPlayer();
@@ -59,65 +89,66 @@ void setup() {
 
   //Initializes Variables
   timer = -1;
+  mode = GAME;
+
+  print(width, height);
 }//----------------------------------------------------------------------------
 
 void draw() {
-  background(black);
 
-  //left player move
-  if (aKey) leftPlayer.addImpulse(-500, 0);
-  if (dKey) leftPlayer.addImpulse(500, 0);
-  //Jumps if it can
-  if (leftCanJump && wKey) leftPlayer.addImpulse(0, -4000);   
+  if (mode == GAME) {
+    image(backgroundList.get(n), 0, 0, width, height*1.25);
+    if ( frameCount % 5 == 0) n++;
+    if (n > 49) n = 0;
 
-  //right player move
-  if (left)  rightPlayer.addImpulse(-500, 0);
-  if (right) rightPlayer.addImpulse(500, 0);
-  //Jumps if it can
-  if (rJump && up) rightPlayer.addImpulse(0, -4000);
+    //left player move
+    if (aKey) leftPlayer.addImpulse(-600, 0);
+    if (dKey) leftPlayer.addImpulse(600, 0);
+    //Jumps if it can
+    if (leftCanJump && wKey) leftPlayer.addImpulse(0, -5000);   
 
-  //player and ball collisions
-  collisions();
+    //right player move
+    if (left)  rightPlayer.addImpulse(-600, 0);
+    if (right) rightPlayer.addImpulse(600, 0);
+    //Jumps if it can
+    if (rJump && up) rightPlayer.addImpulse(0, -5000);
 
-  //left score
-  fill(white);
-  text(leftScore, 50, 100);
+    //Ball
+    if (ball.getX() > width/2 - 10 && ball.getX() < width/2 + 10) {
+      ballColor = blue;
+      ballStroke = darkBlue;
+    }
+    ball.setFillColor(ballColor);
+    ball.setStrokeColor(ballStroke);
 
-  //right score
-  fill(white);
-  text(rightScore, width-50, 100);
+    //player and ball collisions
+    collisions();
 
+    //left score
+    fill(white);
+    text(leftScore, 50, 100);
 
-  world.step(); //Calclates forces
-  world.draw(); //Makes them in processing
-}//----------------------------------------------------------------------------
+    //right score
+    fill(white);
+    text(rightScore, width-50, 100);
 
-void keyPressed() {
-  //Left Player
-  if (key == 'w' || key == 'W') wKey = true;
-  if (key == 'a' || key == 'A') aKey = true;
-  if (key == 's' || key == 'S') sKey = true;
-  if (key == 'd' || key == 'D') dKey = true;
+    //leftPlayer wins
+    if (leftScore == 5) mode = LEFT_WIN;
+    if (rightScore == 5) mode = RIGHT_WIN;
 
-  //Right Player
-  if (keyCode == UP)    up    = true;
-  if (keyCode == LEFT)  left  = true;
-  if (keyCode == DOWN)  down  = true;
-  if (keyCode == RIGHT) right = true;
-}//----------------------------------------------------------------------------
+    world.step(); //Calclates forces
+    world.draw(); //Makes them in processing
 
-void keyReleased() {
-  //Left Player
-  if (key == 'w' || key == 'W') wKey = false;
-  if (key == 'a' || key == 'A') aKey = false;
-  if (key == 's' || key == 'S') sKey = false;
-  if (key == 'd' || key == 'D') dKey = false;
-
-  //Right Player
-  if (keyCode == UP)    up    = false;
-  if (keyCode == LEFT)  left  = false;
-  if (keyCode == DOWN)  down  = false;
-  if (keyCode == RIGHT) right = false;
+    //Ground
+    image(groundPic, 0, height*7/8);
+  } else if (mode == LEFT_WIN) {
+    background(darkViolet);
+    fill(white);
+    text("Violet player wins!", width/2, height/2);
+  } else if (mode == RIGHT_WIN) {
+    background(darkGreen);
+    text("Green player wins!", width/2, height/2);
+  }
 }//----------------------------------------------------------------------------
 
 void collisions() {
@@ -153,6 +184,7 @@ void collisions() {
 
   //Ball collisions
   ArrayList<FContact> ballContactList = ball.getContacts();
+  //0. Contact list
   for (FContact tempContact : ballContactList) {
     //1. falls on left side
     if (tempContact.contains(leftGround)) {
@@ -168,13 +200,53 @@ void collisions() {
       leftScore++;
       timer = 120;
     }//1.
-    //1. touches left player
+
+    //touches left player
     if (tempContact.contains(leftPlayer)) {
-      ball.setFillColor(violet);
-    }//1.
-    //1. touches right player
+      ballColor = purple;
+      ballStroke = darkPurple;
+    }
+
+    //touches right player
     if (tempContact.contains(rightPlayer)) {
-      ball.setFillColor(navy);
-    }//1.
-  }
+      ballColor = mint;
+      ballStroke = darkMint;
+    }
+  }//0.
 }//----------------------------------------------------------------------------
+
+void keyPressed() {
+  //Left Player
+  if (key == 'w' || key == 'W') wKey = true;
+  if (key == 'a' || key == 'A') aKey = true;
+  if (key == 's' || key == 'S') sKey = true;
+  if (key == 'd' || key == 'D') dKey = true;
+
+  //Right Player
+  if (keyCode == UP)    up    = true;
+  if (keyCode == LEFT)  left  = true;
+  if (keyCode == DOWN)  down  = true;
+  if (keyCode == RIGHT) right = true;
+}//----------------------------------------------------------------------------
+
+void keyReleased() {
+  //Left Player
+  if (key == 'w' || key == 'W') wKey = false;
+  if (key == 'a' || key == 'A') aKey = false;
+  if (key == 's' || key == 'S') sKey = false;
+  if (key == 'd' || key == 'D') dKey = false;
+
+  //Right Player
+  if (keyCode == UP)    up    = false;
+  if (keyCode == LEFT)  left  = false;
+  if (keyCode == DOWN)  down  = false;
+  if (keyCode == RIGHT) right = false;
+}//----------------------------------------------------------------------------
+
+void mouseReleased() {
+  if (mode == LEFT_WIN || mode == RIGHT_WIN) {
+    leftScore = 0;
+    rightScore = 0;
+    setup();
+  }
+}

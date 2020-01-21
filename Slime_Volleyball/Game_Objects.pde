@@ -1,10 +1,11 @@
 void leftPlayer() {
-  leftPlayer = new FCircle(width/16);
-  leftPlayer.setPosition(width/4, height*3.25/4);
+  leftPlayer = new FCircle(width/12);
+  leftPlayer.setPosition(width/4, height*3/4);
 
   //Visuals
-  leftPlayer.setFillColor(red);
-  leftPlayer.setNoStroke();
+  leftPlayer.setFillColor(violet);
+  leftPlayer.setStrokeWeight(4);
+  leftPlayer.setStrokeColor(darkViolet);
 
   //Properties
   leftPlayer.setStatic(false);
@@ -15,12 +16,13 @@ void leftPlayer() {
 }//----------------------------------------------------------------------------
 
 void rightPlayer() {
-  rightPlayer = new FCircle(width/16);
-  rightPlayer.setPosition(width*3/4, height*3.25/4);
+  rightPlayer = new FCircle(width/12);
+  rightPlayer.setPosition(width*3/4, height*3/4);
 
   //Visuals
-  rightPlayer.setFillColor(cyan);
-  rightPlayer.setNoStroke();
+  rightPlayer.setFillColor(green);
+  rightPlayer.setStrokeWeight(4);
+  rightPlayer.setStrokeColor(darkGreen);
 
   //Properties
   rightPlayer.setStatic(false);
@@ -35,8 +37,9 @@ void ball() {
   ball.setPosition(width/4, height/2);
 
   //Visuals
-  ball.setFillColor(purple);
-  ball.setNoStroke();
+  ballColor = blue;
+  ballStroke = darkBlue;
+  ball.setStrokeWeight(3);
 
   //Properties
   ball.setStatic(false);

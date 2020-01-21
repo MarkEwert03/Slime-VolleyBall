@@ -58,12 +58,27 @@ void rightGround() {
   world.add(rightGround);
 }//----------------------------------------------------------------------------
 
+void ceiling(){
+  FBox ceiling = new FBox(width, height/64);
+  ceiling.setPosition(width/2, 0);
+
+  //Visuals
+  ceiling.setFillColor(orange);
+  ceiling.setNoStroke();
+
+  //Properties
+  ceiling.setStatic(true);
+  ceiling.setGrabbable(false);
+
+  world.add(ceiling);
+}//---------------------------------------------------------------------------
+
 void net() {
   FBox net = new FBox(width/64, height/8);
   net.setPosition(width/2, height*4.075/5);
 
   //Visuals
-  net.setFillColor(lime);
+  net.setFillColor(white);
   net.setNoStroke();
 
   //Properties
